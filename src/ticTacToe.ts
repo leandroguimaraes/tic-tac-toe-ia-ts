@@ -64,6 +64,9 @@ export class TicTacToe {
   ): TicTacToeAnalysis {
     const currMove = move === Move.O ? Move.X : Move.O;
 
+    const winDistances = [];
+    const lossDistances = [];
+
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (analysis.board[row][col] === Move.null) {
@@ -89,20 +92,13 @@ export class TicTacToe {
           analysis.nDraws += moveAnalysis.nDraws;
 
           analysis.moves[row][col] = moveAnalysis;
+
+          if (moveAnalysis.winDistance)
+            winDistances.push(moveAnalysis.winDistance);
+
+          if (moveAnalysis.lossDistance)
+            lossDistances.push(moveAnalysis.lossDistance);
         }
-      }
-    }
-
-    const winDistances = [];
-    const lossDistances = [];
-
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        if (analysis.moves[row][col]?.winDistance)
-          winDistances.push(analysis.moves[row][col]?.winDistance);
-
-        if (analysis.moves[row][col]?.lossDistance)
-          lossDistances.push(analysis.moves[row][col]?.lossDistance);
       }
     }
 
