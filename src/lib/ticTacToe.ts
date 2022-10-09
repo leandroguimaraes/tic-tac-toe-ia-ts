@@ -99,9 +99,7 @@ export class TicTacToe {
         const check = currMoves.moves[row][col];
         if (check) {
           checkValues.push(
-            `${check.winDistance - 1}:${check.lossDistance - 1}:${this.calcVal(
-              check
-            )}`
+            `${check.winDistance}:${check.lossDistance}:${this.calcVal(check)}`
           );
         } else {
           checkValues.push("---------");
