@@ -42,8 +42,13 @@ export class TicTacToe {
         if (analysis.moves[row][col]) {
           if (analysis.moves[row][col].winDistance === 1) {
             return analysis.moves[row][col];
-          } else if (analysis.moves[row][col].lossDistance === 0) {
-            return analysis.moves[row][col];
+          } else if (analysis.moves[row][col].lossDistance === 2) {
+            for (let rowNotLose = 0; rowNotLose < 3; rowNotLose++) {
+              for (let colNotLose = 0; colNotLose < 3; colNotLose++) {
+                if (analysis.moves[rowNotLose][colNotLose]?.lossDistance > 2)
+                  return analysis.moves[rowNotLose][colNotLose];
+              }
+            }
           } else if (!bestMoveVal) {
             bestMove = analysis.moves[row][col];
             bestMoveVal = this.calcVal(bestMove);
