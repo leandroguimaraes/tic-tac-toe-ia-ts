@@ -31,6 +31,40 @@ export class TicTacToe {
     return this.getSolutionTreeAux(new TicTacToeAnalysis(), Move.O);
   }
 
+  public static getBestMove(
+    analysis: TicTacToeAnalysis
+  ): TicTacToeAnalysis | undefined {
+    let bestMoveVal;
+    let bestMove;
+
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (analysis.moves[row][col]) {
+          if (analysis.moves[row][col].winDistance === 1) {
+            return analysis.moves[row][col];
+          } else if (analysis.moves[row][col].lossDistance === 0) {
+            return analysis.moves[row][col];
+          } else if (!bestMoveVal) {
+            bestMove = analysis.moves[row][col];
+            bestMoveVal = this.calcVal(bestMove);
+          } else {
+            const checkVal = this.calcVal(analysis.moves[row][col]);
+            if (checkVal > bestMoveVal) {
+              bestMove = analysis.moves[row][col];
+              bestMoveVal = checkVal;
+            }
+          }
+        }
+      }
+    }
+
+    return bestMove;
+  }
+
+  private static calcVal(analysis: TicTacToeAnalysis): number {
+    return analysis.nWins - analysis.nDraws - analysis.nLosses;
+  }
+
   public static boardToString(board: Move[][]): string {
     const result = [];
     for (let row = 0; row < 3; row++) {
@@ -39,7 +73,7 @@ export class TicTacToe {
       }
     }
 
-    return result.join(',');
+    return result.join(",");
   }
 
   public static printTicTacToe(ticTacToe: Move[][]): void {
@@ -47,15 +81,36 @@ export class TicTacToe {
       const values = [];
       for (let col = 0; col < 3; col++) {
         values.push(
-          ticTacToe[row][col] !== Move.null ? Move[ticTacToe[row][col]] : ' '
+          ticTacToe[row][col] !== Move.null ? Move[ticTacToe[row][col]] : " "
         );
       }
 
-      console.log(values.join(' | '));
+      console.log(values.join(" | "));
       if (row < 2) {
-        console.log('-------------');
+        console.log("-------------");
       }
     }
+  }
+
+  public static debug(currMoves: TicTacToeAnalysis): void {
+    const checkValues = [];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        const check = currMoves.moves[row][col];
+        if (check) {
+          checkValues.push(
+            `${check.winDistance - 1}:${check.lossDistance - 1}:${this.calcVal(
+              check
+            )}`
+          );
+        } else {
+          checkValues.push("---------");
+        }
+      }
+    }
+    console.log(checkValues.slice(0, 3).join(","));
+    console.log(checkValues.slice(3, 6).join(","));
+    console.log(checkValues.slice(6, 9).join(","));
   }
 
   private static getSolutionTreeAux(
@@ -71,7 +126,7 @@ export class TicTacToe {
       for (let col = 0; col < 3; col++) {
         if (analysis.board[row][col] === Move.null) {
           const moveAnalysis = new TicTacToeAnalysis();
-          moveAnalysis.board = analysis.board.map(arr => arr.slice());
+          moveAnalysis.board = analysis.board.map((arr) => arr.slice());
           moveAnalysis.board[row][col] = currMove;
 
           moveAnalysis.status = this.calcStatus(moveAnalysis.board, Move.X);
