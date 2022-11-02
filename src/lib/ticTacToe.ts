@@ -37,14 +37,23 @@ export class TicTacToe {
     let bestMoveVal;
     let bestMove;
 
+    // search for a winner move
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        if (analysis.moves[row][col]?.winDistance === 1) {
+          return analysis.moves[row][col];
+        }
+      }
+    }
+
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (analysis.moves[row][col]) {
-          if (analysis.moves[row][col].winDistance === 1) {
-            return analysis.moves[row][col];
-          } else if (analysis.moves[row][col].lossDistance === 2) {
+          // if there is a loss move
+          if (analysis.moves[row][col].lossDistance === 2) {
             for (let rowNotLose = 0; rowNotLose < 3; rowNotLose++) {
               for (let colNotLose = 0; colNotLose < 3; colNotLose++) {
+                // search for the move that avoid the imediate loss
                 if (analysis.moves[rowNotLose][colNotLose]?.lossDistance > 2)
                   return analysis.moves[rowNotLose][colNotLose];
               }
