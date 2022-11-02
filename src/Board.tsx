@@ -3,31 +3,29 @@ import { useState, useEffect } from "react";
 import { MoveStatus, TicTacToe, TicTacToeAnalysis } from "./lib/ticTacToe";
 import Tile from "./Tile";
 
-function Board(props: any) {
-  let analysis: TicTacToeAnalysis = props.analysis;
-  const [tiles, setTiles] = useState(setBoard(analysis));
+function Board(props: { analysis: TicTacToeAnalysis }) {
+  const [analysis, setAnalysis] = useState(props.analysis);
 
   useEffect(() => {
-    setTiles(setBoard(props.analysis));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setAnalysis(props.analysis);
   }, [props.analysis]);
 
   function onTileClick(row: number, col: number): void {
-    if (analysis.moves[row][col]) {
-      analysis = analysis.moves[row][col];
-      if (analysis.status === MoveStatus.Undefined) {
-        analysis = TicTacToe.getBestMove(analysis) as TicTacToeAnalysis;
+    let currAnalysis = analysis.moves[row][col];
+    if (currAnalysis) {
+      if (currAnalysis.status === MoveStatus.Undefined) {
+        currAnalysis = TicTacToe.getBestMove(currAnalysis) as TicTacToeAnalysis;
       }
 
-      setTiles(setBoard(analysis));
+      setAnalysis(currAnalysis);
     }
   }
 
-  function setBoard(analysis: TicTacToeAnalysis): any[] {
-    const newTiles = [];
+  function TicTacToeBoard(): JSX.Element {
+    const tiles = [];
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
-        newTiles.push(
+        tiles.push(
           <div
             onClick={() => onTileClick(row, col)}
             className="tile-wrapper"
@@ -39,10 +37,10 @@ function Board(props: any) {
       }
     }
 
-    return newTiles;
+    return <div className="board">{tiles}</div>;
   }
 
-  return <div className="board">{tiles}</div>;
+  return <TicTacToeBoard />;
 }
 
 export default Board;
