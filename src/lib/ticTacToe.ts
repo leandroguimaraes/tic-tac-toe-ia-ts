@@ -27,11 +27,24 @@ export class TicTacToeAnalysis {
 }
 
 export class TicTacToe {
-  public static getSolutionTree(): TicTacToeAnalysis {
-    return this.getSolutionTreeAux(new TicTacToeAnalysis(), Move.O);
+  private memory = new Map<string, TicTacToeAnalysis>();
+
+  constructor() {
+    this.calcSolutionTree(new TicTacToeAnalysis(), Move.O);
   }
 
-  public static getBestMove(
+  public play(board?: Move[][]): TicTacToeAnalysis | undefined {
+    if (!board) {
+      const analysis = new TicTacToeAnalysis();
+      board = analysis.board;
+    }
+
+    const analysis = this.memory.get(this.boardToString(board));
+
+    return this.getBestMove(analysis as TicTacToeAnalysis);
+  }
+
+  private getBestMove(
     analysis: TicTacToeAnalysis
   ): TicTacToeAnalysis | undefined {
     let bestMoveVal;
@@ -75,11 +88,11 @@ export class TicTacToe {
     return bestMove;
   }
 
-  private static calcVal(analysis: TicTacToeAnalysis): number {
+  private calcVal(analysis: TicTacToeAnalysis): number {
     return analysis.nWins - analysis.nDraws - analysis.nLosses;
   }
 
-  public static boardToString(board: Move[][]): string {
+  private boardToString(board: Move[][]): string {
     const result = [];
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
@@ -90,7 +103,7 @@ export class TicTacToe {
     return result.join(",");
   }
 
-  public static printTicTacToe(ticTacToe: Move[][]): void {
+  public printTicTacToe(ticTacToe: Move[][]): void {
     for (let row = 0; row < 3; row++) {
       const values = [];
       for (let col = 0; col < 3; col++) {
@@ -106,7 +119,7 @@ export class TicTacToe {
     }
   }
 
-  public static debug(currMoves: TicTacToeAnalysis): void {
+  public debug(currMoves: TicTacToeAnalysis): void {
     const checkValues = [];
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
@@ -125,10 +138,7 @@ export class TicTacToe {
     console.log(checkValues.slice(6, 9).join(","));
   }
 
-  private static getSolutionTreeAux(
-    analysis: TicTacToeAnalysis,
-    move: Move
-  ): TicTacToeAnalysis {
+  private calcSolutionTree(analysis: TicTacToeAnalysis, move: Move): void {
     const currMove = move === Move.O ? Move.X : Move.O;
 
     const winDistances = [];
@@ -137,21 +147,26 @@ export class TicTacToe {
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (analysis.board[row][col] === Move.null) {
-          const moveAnalysis = new TicTacToeAnalysis();
+          let moveAnalysis = new TicTacToeAnalysis();
           moveAnalysis.board = analysis.board.map((arr) => arr.slice());
           moveAnalysis.board[row][col] = currMove;
 
-          moveAnalysis.status = this.calcStatus(moveAnalysis.board, Move.X);
-          if (moveAnalysis.status === MoveStatus.Undefined) {
-            this.getSolutionTreeAux(moveAnalysis, currMove);
-          } else if (moveAnalysis.status === MoveStatus.Win) {
-            moveAnalysis.nWins++;
-            moveAnalysis.winDistance = 1;
-          } else if (moveAnalysis.status === MoveStatus.Loss) {
-            moveAnalysis.nLosses++;
-            moveAnalysis.lossDistance = 1;
-          } else if (moveAnalysis.status === MoveStatus.Draw) {
-            moveAnalysis.nDraws++;
+          const hash = this.boardToString(moveAnalysis.board);
+          if (!this.memory.has(hash)) {
+            moveAnalysis.status = this.calcStatus(moveAnalysis.board, Move.X);
+            if (moveAnalysis.status === MoveStatus.Undefined) {
+              this.calcSolutionTree(moveAnalysis, currMove);
+            } else if (moveAnalysis.status === MoveStatus.Win) {
+              moveAnalysis.nWins++;
+              moveAnalysis.winDistance = 1;
+            } else if (moveAnalysis.status === MoveStatus.Loss) {
+              moveAnalysis.nLosses++;
+              moveAnalysis.lossDistance = 1;
+            } else if (moveAnalysis.status === MoveStatus.Draw) {
+              moveAnalysis.nDraws++;
+            }
+          } else {
+            moveAnalysis = this.memory.get(hash) as TicTacToeAnalysis;
           }
 
           analysis.nWins += moveAnalysis.nWins;
@@ -165,6 +180,8 @@ export class TicTacToe {
 
           if (moveAnalysis.lossDistance)
             lossDistances.push(moveAnalysis.lossDistance);
+
+          this.memory.set(hash, moveAnalysis);
         }
       }
     }
@@ -172,11 +189,9 @@ export class TicTacToe {
     if (winDistances.length) analysis.winDistance = winDistances.sort()[0] + 1;
     if (lossDistances.length)
       analysis.lossDistance = lossDistances.sort()[0] + 1;
-
-    return analysis;
   }
 
-  private static calcStatus(board: Move[][], me: Move): MoveStatus {
+  private calcStatus(board: Move[][], me: Move): MoveStatus {
     for (let i = 0; i < 3; i++) {
       if (
         board[i][0] !== Move.null &&

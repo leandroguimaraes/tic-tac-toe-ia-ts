@@ -1,22 +1,33 @@
 import "./Board.scss";
-import { useState, useEffect } from "react";
-import { MoveStatus, TicTacToe, TicTacToeAnalysis } from "./lib/ticTacToe";
+import { useState } from "react";
+import { Move, TicTacToe, TicTacToeAnalysis } from "./lib/ticTacToe";
 import Tile from "./Tile";
 
-function Board(props: { analysis: TicTacToeAnalysis }) {
-  const [analysis, setAnalysis] = useState(props.analysis);
+function Board() {
+  const ticTacToe = new TicTacToe();
 
-  useEffect(() => {
-    setAnalysis(props.analysis);
-  }, [props.analysis]);
+  const [analysis, setAnalysis] = useState(getInitAnalysis());
+
+  function onStartClick(): void {
+    setAnalysis(getInitAnalysis());
+  }
+
+  function getInitAnalysis(): TicTacToeAnalysis {
+    const analysis = new TicTacToeAnalysis();
+    analysis.board[getRand(0, 2)][getRand(0, 2)] = Move.X;
+
+    return analysis;
+  }
+
+  function getRand(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
 
   function onTileClick(row: number, col: number): void {
-    let currAnalysis = analysis.moves[row][col];
-    if (currAnalysis) {
-      if (currAnalysis.status === MoveStatus.Undefined) {
-        currAnalysis = TicTacToe.getBestMove(currAnalysis) as TicTacToeAnalysis;
-      }
+    analysis.board[row][col] = Move.O;
 
+    const currAnalysis = ticTacToe.play(analysis.board);
+    if (currAnalysis) {
       setAnalysis(currAnalysis);
     }
   }
@@ -40,7 +51,12 @@ function Board(props: { analysis: TicTacToeAnalysis }) {
     return <div className="board">{tiles}</div>;
   }
 
-  return <TicTacToeBoard />;
+  return (
+    <>
+      <button onClick={onStartClick}>Start</button>
+      <TicTacToeBoard />
+    </>
+  );
 }
 
 export default Board;
