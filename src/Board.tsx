@@ -3,9 +3,7 @@ import { useState } from "react";
 import { Move, TicTacToe, TicTacToeAnalysis } from "./lib/ticTacToe";
 import Tile from "./Tile";
 
-function Board() {
-  const ticTacToe = new TicTacToe();
-
+function Board(props: { ticTacToe: TicTacToe }) {
   const [analysis, setAnalysis] = useState(getInitAnalysis());
 
   function onStartClick(): void {
@@ -27,7 +25,7 @@ function Board() {
     analysis.board[row][col] = Move.O;
 
     try {
-      const currAnalysis = ticTacToe.play(analysis.board);
+      const currAnalysis = props.ticTacToe.play(analysis.board);
       if (currAnalysis) {
         setAnalysis(currAnalysis);
       }
