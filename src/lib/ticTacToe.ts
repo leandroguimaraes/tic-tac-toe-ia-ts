@@ -40,6 +40,9 @@ export class TicTacToe {
     }
 
     const analysis = this.memory.get(this.boardToString(board));
+    if (!analysis) {
+      throw new Error("Impossible move");
+    }
 
     return this.getBestMove(analysis as TicTacToeAnalysis);
   }

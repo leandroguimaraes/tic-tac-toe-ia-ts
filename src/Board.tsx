@@ -26,9 +26,13 @@ function Board() {
   function onTileClick(row: number, col: number): void {
     analysis.board[row][col] = Move.O;
 
-    const currAnalysis = ticTacToe.play(analysis.board);
-    if (currAnalysis) {
-      setAnalysis(currAnalysis);
+    try {
+      const currAnalysis = ticTacToe.play(analysis.board);
+      if (currAnalysis) {
+        setAnalysis(currAnalysis);
+      }
+    } catch (e) {
+      // ignore impossible move errors
     }
   }
 
