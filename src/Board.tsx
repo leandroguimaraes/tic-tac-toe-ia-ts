@@ -1,6 +1,11 @@
 import "./Board.scss";
 import { useState } from "react";
-import { Move, TicTacToe, TicTacToeAnalysis } from "./lib/ticTacToe";
+import {
+  Move,
+  MoveStatus,
+  TicTacToe,
+  TicTacToeAnalysis,
+} from "./lib/ticTacToe";
 import Tile from "./Tile";
 
 function Board(props: { ticTacToe: TicTacToe }) {
@@ -22,15 +27,17 @@ function Board(props: { ticTacToe: TicTacToe }) {
   }
 
   function onTileClick(row: number, col: number): void {
-    analysis.board[row][col] = Move.O;
+    if (
+      analysis.status === MoveStatus.Undefined &&
+      analysis.board[row][col] === Move.null
+    ) {
+      const board = analysis.board.map((arr) => arr.slice());
+      board[row][col] = Move.O;
 
-    try {
-      const currAnalysis = props.ticTacToe.play(analysis.board);
+      const currAnalysis = props.ticTacToe.play(board);
       if (currAnalysis) {
         setAnalysis(currAnalysis);
       }
-    } catch (e) {
-      // ignore impossible move errors
     }
   }
 
